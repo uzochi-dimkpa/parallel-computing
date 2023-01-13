@@ -1,0 +1,10 @@
+*.o
+main
+approx
+prelim
+time
+*.vscode
+activity-hello.tar
+activity-hello.tgz
+valgrind_test
+valgrind_test.cpp
