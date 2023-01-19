@@ -93,7 +93,7 @@ int main (int argc, char* argv[]) {
   out *= coeff;
 
   auto timeEnd = std::chrono::system_clock::now();
-  std::chrono::duration duration = timeEnd - timeStart;
+  std::chrono::duration <double> duration = timeEnd - timeStart;
 
   // Output
   std::cout << out << std::endl; // answer
