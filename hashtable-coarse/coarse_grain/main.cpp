@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <thread>
 
 #include "Dictionary.cpp"
 #include "MyHashtable.cpp"
@@ -75,7 +76,80 @@ int main(int argc, char **argv)
 
 
 
-  // write code here
+  // TODO: write code here
+  std::vector<std::thread> threadbatch;
+
+  // std::thread thd;
+
+  for (auto & filecontent: wordmap) {
+    std::thread thd;
+
+    thd = std::thread (
+      [&filecontent, &dict]() {
+        for (auto & w : filecontent) {
+          // thd = std::thread (
+          //   [w, &dict]() {
+              int count = dict.get(w);
+              ++count;
+              dict.set(w, count);
+          //   }
+          // );
+
+          // threadbatch.push_back(std::move(thd));
+        }
+      }
+    );
+
+    // thd = std::thread (
+    //   []() {
+    //     std::cout << "Hello! I am a thread." << std::endl;
+    //   }
+    // );
+
+    // thd.join();
+    threadbatch.push_back(std::move(thd));
+    // thd.join();
+
+    for (auto &t: threadbatch) {
+      if (t.joinable()) {
+        t.join();
+        // std::cout << "Thread joined!" << std::endl;
+      }
+    }
+
+    /*
+    for (auto & w : filecontent) {
+      int count = dict.get(w);
+      ++count;
+      dict.set(w, count);
+    }
+    /**/
+
+    // DEBUG
+    // std::cout << w << ", " << count << ", " << std::endl;
+  }
+
+  // DEBUG
+  // std::cout << "the: " << dict.get("the") << std::endl;
+
+  // thd.join();
+  // threadbatch.push_back(std::move(thd));
+
+  // for (auto &t: threadbatch) {
+  //   if (t.joinable()) {
+  //     t.join();
+  //     // std::cout << "Thread joined!" << std::endl;
+  //   }
+  // }
+
+  // // Populate Hash Table
+  // for (auto & filecontent: wordmap) {
+  //   for (auto & w : filecontent) {
+  //     int count = dict.get(w);
+  //     ++count;
+  //     dict.set(w, count);
+  //   }
+  // }
 
 
 
@@ -92,7 +166,7 @@ int main(int argc, char **argv)
     if (it.second > thresholdCount)
       std::cout << it.first << " " << it.second << std::endl;
   }
-  */
+  /**/
 
   // Do not touch this, need for test cases
   std::cout << ht.get(testWord) << std::endl;
