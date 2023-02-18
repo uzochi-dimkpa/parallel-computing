@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <thread>
+#include <mutex>
 
 #include "Dictionary.cpp"
 #include "MyHashtable.cpp"
@@ -77,79 +78,35 @@ int main(int argc, char **argv)
 
 
   // TODO: write code here
-  std::vector<std::thread> threadbatch;
-
-  // std::thread thd;
+  std::vector<std::thread> threadbatch; std::mutex mtx;
+  // mtx.lock();
 
   for (auto & filecontent: wordmap) {
     std::thread thd;
 
     thd = std::thread (
-      [&filecontent, &dict]() {
+      [&mtx, &filecontent, &dict]() {
         for (auto & w : filecontent) {
-          // thd = std::thread (
-          //   [w, &dict]() {
-              int count = dict.get(w);
-              ++count;
-              dict.set(w, count);
-          //   }
-          // );
+          mtx.lock();
 
-          // threadbatch.push_back(std::move(thd));
+          int count = dict.get(w);
+          ++count;
+          dict.set(w, count);
+
+          mtx.unlock();
         }
       }
     );
 
-    // thd = std::thread (
-    //   []() {
-    //     std::cout << "Hello! I am a thread." << std::endl;
-    //   }
-    // );
-
-    // thd.join();
+    // mtx.unlock();
     threadbatch.push_back(std::move(thd));
-    // thd.join();
-
-    for (auto &t: threadbatch) {
-      if (t.joinable()) {
-        t.join();
-        // std::cout << "Thread joined!" << std::endl;
-      }
-    }
-
-    /*
-    for (auto & w : filecontent) {
-      int count = dict.get(w);
-      ++count;
-      dict.set(w, count);
-    }
-    /**/
-
-    // DEBUG
-    // std::cout << w << ", " << count << ", " << std::endl;
   }
 
-  // DEBUG
-  // std::cout << "the: " << dict.get("the") << std::endl;
-
-  // thd.join();
-  // threadbatch.push_back(std::move(thd));
-
-  // for (auto &t: threadbatch) {
-  //   if (t.joinable()) {
-  //     t.join();
-  //     // std::cout << "Thread joined!" << std::endl;
-  //   }
-  // }
-
-  // // Populate Hash Table
-  // for (auto & filecontent: wordmap) {
-  //   for (auto & w : filecontent) {
-  //     int count = dict.get(w);
-  //     ++count;
-  //     dict.set(w, count);
-  //   }
-  // }
+  for (auto &t: threadbatch) {
+    if (t.joinable()) {
+      t.join();
+    }
+  }
 
 
 
