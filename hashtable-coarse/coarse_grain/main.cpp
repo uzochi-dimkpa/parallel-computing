@@ -81,19 +81,14 @@ int main(int argc, char **argv)
   // Start Timer
   auto start =std::chrono::steady_clock::now();
 
-  std::vector<std::thread> threadbatch;
-  std::mutex mtx;
+  std::vector<std::thread> threadbatch; std::mutex mtx;
 
   for (auto & filecontent: wordmap) {
     std::thread thd;
-    // std::mutex mtx;
 
     thd = std::thread (
       [&mtx, &filecontent, &dict]() {
         for (auto & w : filecontent) {
-          // std::mutex new_mtx;
-          // std::lock_guard<std::mutex> lg(std::ref(new_mtx));
-
           std::lock_guard<std::mutex> lg(std::ref(mtx));
           // mtx.lock();
 
