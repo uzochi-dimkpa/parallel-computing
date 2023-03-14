@@ -59,7 +59,6 @@ int main (int argc, char* argv[]) {
       // --
       x = (a + (coeff * (i + 0.5)));
       out += function[fid - 1](x, intensity) * coeff;
-      // int y = 3;
     }
   );
   
