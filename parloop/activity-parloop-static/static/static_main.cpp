@@ -54,6 +54,9 @@ int main (int argc, char* argv[]) {
   // Mutex declaration
   std::mutex mtx;
   
+  // Declaring vector of std::thread type
+  // std::vector<std::thread> threadbatch;
+  
   // DEBUG
   // std::cout << "Declared mutex" << std::endl;
   
@@ -85,17 +88,19 @@ int main (int argc, char* argv[]) {
   std::function<void(int, double&)> f = [&](int i, double& out) {
     // DEBUG
     // std::cout << "in f" << std::endl;
-    x = (a + (coeff * (i + 0.5)));
-    out += function[fid - 1](x, intensity) * coeff;
+    // x = (a + (coeff * (i + 0.5))); out += function[fid - 1](x, intensity) * coeff;
+    out += function[fid - 1]((a + (coeff * (i + 0.5))), intensity) * coeff;
     // DEBUG
-    // std::cout << "x: " << x << ", out: " << out << std::endl;
+    // std::cout << "x: " << (a + (coeff * (i + 0.5))) << ", out: " << out << std::endl;
     // std::cout << "exiting f" << std::endl;
   };
   
   std::function<void(double&)> after = [&](double& out) {
     // DEBUG
     // std::cout << "in after" << std::endl;
-    mtx.lock(); total += out; mtx.unlock();
+    // mtx.lock();
+    total += out;
+    // mtx.unlock();
     // DEBUG
     // std::cout << "total: " << total << std::endl;
     // std::cout << "exiting after" << std::endl;
@@ -114,7 +119,6 @@ int main (int argc, char* argv[]) {
   for (int nbt = 0; nbt < nbthreads; ++nbt) {
     // DEBUG
     // std::cout << "~~~~~ --> Thread #" << nbt + 1 << ", beg: " << nbt * temp_out[0] << ", end: " << (nbt + 1) * temp_out[0] << std::endl;
-
     if (nbt < nbthreads - 1) { // Threads #1 to #(n - 1)
       staticloop.parfor(nbt * temp_out[0], (nbt + 1) * temp_out[0], 1,
         before
@@ -132,7 +136,16 @@ int main (int argc, char* argv[]) {
         after
       );
     }
+    // DEBUG
+    // std::cout << "\n\n" << std::endl;
   }
+  
+  // for (auto &t: staticloop.threadbatch) {
+  //   if (t.joinable()) {
+  //     // after(out);
+  //     t.join();
+  //   }
+  // }
   // Computation end
   
   // Computation start
@@ -158,7 +171,6 @@ int main (int argc, char* argv[]) {
   // out_original *= coeff;
   
   // Computation start
-  // DEBUG
   // double x_original = 0.0; double out_original = 0.0;
   // staticloop.parfor(0, n, 1,
   //   [&](int i) -> void {

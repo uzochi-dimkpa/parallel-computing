@@ -4,6 +4,7 @@
 #include <functional>
 #include <vector>
 #include <thread>
+#include <mutex>
 
 // #include <iostream>
 
@@ -30,7 +31,10 @@ public:
     }
   }
   
-  // Declaring vector of thread type
+  // Mutex declaration
+  std::mutex mtx;
+  
+  // Declaring vector of std::thread type
   std::vector<std::thread> threadbatch;
   
   /// @brief execute the function f multiple times with different
@@ -71,24 +75,51 @@ public:
       )
     );
     
-    for (auto &t: threadbatch) {
-      if (t.joinable()) {
-        t.join();
-      }
-    }
-    
     // threadbatch.push_back(std::move(thd));
+    
+    // TLS tls;
     
     // std::thread thd (
     //   [&]() {
-    //     TLS tls;
     //     before(tls);    
     //     for (size_t i=beg; i<end; i+= increment) {
     //       f(i, tls);
     //     }
-    //     after(tls);
     //   }
-    // ); thd.join();
+    // );
+    
+    // // after(tls);
+    
+    // threadbatch.push_back(std::move(thd));
+    
+    // thd.join();
+    
+    // threadbatch.push_back (
+    //   std::move (
+    //     std::thread (
+    //       [&]() {
+    //         // TLS tls;
+    //         before(tls);    
+    //         for (size_t i=beg; i<end; i+= increment) {
+    //           f(i, tls);
+    //         }
+    //         // after(tls);
+    //       }
+    //     )
+    //   )
+    // );
+    
+    for (auto &t: threadbatch) {
+      // TLS tls;
+      // mtx.lock();
+      // mtx.unlock();
+      if (t.joinable()) {
+        // t;
+        // after(tls);
+        t.join();
+      }
+      // after(tls);
+    }
     
     // Original code
     // TLS tls;
@@ -98,7 +129,6 @@ public:
     // }
     // after(tls);
   }
-  
 };
 
 #endif
