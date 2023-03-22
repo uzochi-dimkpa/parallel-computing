@@ -113,7 +113,7 @@ int main (int argc, char* argv[]) {
   //     out_original += function[fid - 1](x_original, intensity) * coeff;
   //   }
   // );
-  // Original computation endComputation end
+  // Original computation end
   
   // Time end
   std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();

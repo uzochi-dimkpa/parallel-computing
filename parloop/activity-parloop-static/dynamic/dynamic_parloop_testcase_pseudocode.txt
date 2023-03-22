@@ -1,0 +1,32 @@
+beg = 0, end = 100, begtoend = 100, granularity = 30:
+
+begtoend = (end - beg) = (100 - 0) = 100
+1) while 100 > 0
+- b = 70, e = 100
+- MTX2_LOCK begtoend = (100 - 30) = 70 MTX2_UNLOCK
+- before, f
+- MTX1_LOCK after MTX1_UNLOCK
+
+2) while 70 > 0
+- b = 40, e = 70
+- MTX2_LOCK begtoend = (70 - 30) = 40 MTX2_UNLOCK
+- before, f
+- MTX1_LOCK after MTX1_UNLOCK
+
+3) while 40 > 0
+- b = 10, e = 40
+- MTX2_LOCK begtoend = (40 - 30) = 10 MTX2_UNLOCK
+- before, f
+- MTX1_LOCK after MTX1_UNLOCK
+
+4) while 10 > 0
+- b = -20, e = 10
+- IF COND ((begtoend - granularity) < 0) AND COND ((begtoend % granularity) != 0) THEN {
+	- b = 0, e = (begtoend % granularity) = (10 % 30) = 10
+}
+- MTX2_LOCK begtoend = (10 - 30) = -20 MTX2_UNLOCK
+- before, f
+- MTX1_LOCK after MTX1_UNLOCK
+
+5) while -20 > 0
+- BREAK
