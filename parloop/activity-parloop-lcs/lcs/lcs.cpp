@@ -160,8 +160,8 @@ int main (int argc, char* argv[]) {
   // DEBUG
   // std::cout << "========== X[" << 1 << "] & Y[" << 4 << "] ----> " << X[1] << " & " << Y[4] << std::endl;
 
-  /// TODO: Write Paralle LCS algorithm
-  /// COMPLETED: Write Paralle LCS algorithm
+  /// TODO: Write Parallel LCS algorithm
+  /// COMPLETED: Write Parallel LCS algorithm
   // for (int nd = 1; nd <= num_diagonals; ++nd) {
   //   int xmax, ymax;
   //   // DEBUG
