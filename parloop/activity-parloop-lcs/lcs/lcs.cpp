@@ -130,8 +130,8 @@ int main (int argc, char* argv[]) {
   // Time start
   std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
 
-  /// TODO: Parallel LCS algorithm
-  /// COMPLETED: Parallel LCS algorithm
+  /// TODO: Run parallel LCS algorithm
+  /// COMPLETED: Run parallel LCS algorithm
   C = new int*[m+1]; num_diagonals = m + n - 1;
   for (int i=0; i<=m; ++i) {
     C[i] = new int[n+1];
@@ -160,8 +160,8 @@ int main (int argc, char* argv[]) {
   // DEBUG
   // std::cout << "========== X[" << 1 << "] & Y[" << 4 << "] ----> " << X[1] << " & " << Y[4] << std::endl;
 
-  /// TODO: Write Parallel LCS algorithm
-  /// COMPLETED: Write Parallel LCS algorithm
+  /// TODO: Write parallel LCS algorithm
+  /// COMPLETED: Write parallel LCS algorithm
   // for (int nd = 1; nd <= num_diagonals; ++nd) {
   //   int xmax, ymax;
   //   // DEBUG
