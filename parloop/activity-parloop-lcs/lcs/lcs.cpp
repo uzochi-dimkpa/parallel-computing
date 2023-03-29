@@ -105,7 +105,7 @@ int main (int argc, char* argv[]) {
     /**/
     int x, y;
     x = i; if (x >= m - 1) {x = m - 1;} // -- x = a - 1;
-    y = end; if (y >= n - 1) {y = n - 1;} // -- y = b - 1;
+    y = end - i + beg; if (y >= n - 1) {y = n - 1;} // -- y = b - 1;
     // DEBUG
     // std::cout << "===>> x: " << x << " <<==="<< std::endl;
     // std::cout << "===>> y: " << y << " <<==="<< std::endl;
