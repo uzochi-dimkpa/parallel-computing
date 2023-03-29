@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <thread>
+#include <mutex>
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,6 +24,53 @@ extern "C" {
 
 
 
+// Sequential lcs algorithm
+void sequenial_lcs(int m, int n, int** C, char *X, char *Y) {
+  // DEBUG
+  // std::cout << "in sequential_lcs" << std::endl;
+  /**/
+  for (int nd = 1; nd <= (m + n - 1); ++nd) {
+    int x, y, beg, end;
+    // DEBUG
+    // std::cout << "~~~~~~~~~~ >> grain #" << nd << std::endl;
+    if (nd <= std::max(m, n)) {
+      // DEBUG
+      // std::cout << "~~~~~~~~~~ >> IF" << std::endl;
+      beg = 0;
+      end = nd - 1;
+    } else {
+      // DEBUG
+      // std::cout << "~~~~~~~~~~ >> ELSE" << std::endl;
+      beg = nd - (std::max(m, n));
+      end = std::max(m, n) - 1;
+    }
+    
+    for (int i = beg; i <= end; ++i) {
+      x = i; if (x >= m - 1) {x = m - 1;} // -- x = a - 1;
+      y = end - i + beg; if (y >= n - 1) {y = n - 1;} // -- y = b - 1;
+      // DEBUG
+      // std::cout << "--> X[" << x << "], Y[" << y << "]: " << X[x] << ", " << Y[y] << std::endl;
+      // std::cout << "===>> x: " << x << " <<==="<< std::endl;
+      // std::cout << "===>> y: " <<  y << " <<==="<< std::endl;
+      if (X[x] == Y[y]) {
+        // DEBUG
+        // std::cout << "!!! MATCH !!!"<<std::endl;
+        // std::cout << "---> C[" << x << "+1][" << y << "+1] = " << C[x+1][y+1] << std::endl;
+        C[x+1][y+1] = C[x][y] + 1;
+      } else {
+        C[x+1][y+1] = std::max(C[x][y+1], C[x+1][y]);
+      }
+      // DEBUG
+      // std::cout << "---> C[" << x << "][" << y << "] = " << C[x][y] << std::endl;
+    }
+  }
+  /**/
+  // DEBUG
+  // std::cout << "exiting sequential_lcs" << std::endl;
+};
+
+
+
 int main (int argc, char* argv[]) {
 
   if (argc < 4) { std::cerr<<"usage: "<<argv[0]<<" <m> <n> <nbthreads>"<<std::endl;
@@ -32,12 +80,12 @@ int main (int argc, char* argv[]) {
   // OmpLoop object declaration
   OmpLoop omploop;
 
-  // Declaring vector of std::thread type
-  std::vector<std::thread> threadbatch;
+  // Mutex declaration
+  std::mutex mtx;
 
   // Declaring int array C
   int** C;
-  int result, num_diagonals;
+  int result, beg, end;
 
   // Gathering arguments
   int m = atoi(argv[1]);
@@ -50,89 +98,41 @@ int main (int argc, char* argv[]) {
   generateLCS(X, m, Y, n);
 
   // Parloop function declaractions
-  std::function<void()> before = [&]() { // -- double& out
-    // DEBUG
-    // std::cout << "in before" << std::endl;
-    // -- 
-    // DEBUG
-    // std::cout << "exiting before" << std::endl;
-  };
-  
-  std::function<void()> f = [&]() {
+  std::function<void(int)> f = [&](int i) {
     // DEBUG
     // std::cout << "in f: " << std::endl;
     // std::cout << "i: " << (i + 1) << std::endl;
-    // -- //
-    for (int nd = 1; nd <= num_diagonals; ++nd) {
-      int xmax, ymax;
-      
-      if (nd <= std::max(m, n)) {
-        int beg = 1;
-        int end = nd;
-        int a = 1;
-        int b = nd;
-        
-        for (int i = beg; i <= end; ++i) {
-          xmax = a - 1; if ((a-1) >= m) {xmax = m - 1;}
-          ymax = b - 1; if ((b-1) >= n) {ymax = n - 1;}
-          
-          if (X[xmax] == Y[ymax]) {
-            C[xmax+1][ymax+1] = C[xmax][ymax] + 1;
-          } else {
-            C[xmax+1][ymax+1] = std::max(C[xmax][ymax+1], C[xmax+1][ymax]);
-          }
-          
-          if (i == end) {
-            break;
-          } else{
-            ++a; --b;
-          }
-        }
-      } else {
-        int beg = nd - (std::max(m, n)) + 1;
-        int end = std::max(m, n);
-        int a = nd - (std::max(m, n)) + 1;
-        int b = std::max(m, n);
-        
-        for (int i = beg; i <= end; ++i) {
-          xmax = a - 1; if ((a-1) >= m) {xmax = m - 1;}
-          ymax = b - 1; if ((b-1) >= n) {ymax = n - 1;}
-          
-          if (X[xmax] == Y[ymax]) {
-            C[xmax+1][ymax+1] = C[xmax][ymax] + 1; 
-          } else {
-            C[xmax+1][ymax+1] = std::max(C[xmax][ymax+1], C[xmax+1][ymax]);
-          }
-          
-          if (i == end) {
-            break;
-          } else{
-            ++a; --b;
-          }
-        }
-      }
+    /**/
+    int x, y;
+    x = i; if (x >= m - 1) {x = m - 1;} // -- x = a - 1;
+    y = end; if (y >= n - 1) {y = n - 1;} // -- y = b - 1;
+    // DEBUG
+    // std::cout << "===>> x: " << x << " <<==="<< std::endl;
+    // std::cout << "===>> y: " << y << " <<==="<< std::endl;
+    // std::cout << "--> X[" << x << "], Y[" << y << "]: " << X[x] << ", " << Y[y] << std::endl;
+    if (X[x] == Y[y]) {
+      // DEBUG
+      // std::cout << "!!! MATCH !!!"<<std::endl;
+      // std::cout << "---> C[" << x << "+1][" << y << "+1] = " << C[x+1][y+1] << std::endl;
+      C[x+1][y+1] = C[x][y] + 1; 
+    } else {
+      C[x+1][y+1] = std::max(C[x][y+1], C[x+1][y]);
     }
-    // -- //
+    // DEBUG
+    // std::cout << "---> C[" << x << "][" << y << "] = " << C[x][y] << std::endl;
+    /**/
     // DEBUG
     // std::cout << "exiting f" << std::endl;
   };
-  
-  std::function<void()> after = [&]() {
-    // DEBUG
-    // std::cout << "in after" << std::endl;
-    // --
-    // DEBUG
-    // std::cout << "exiting after" << std::endl;
-  };
 
-  /// TODO: insert LCS code here.
-  /// COMPLETED: insert LCS code here.
+  /// TODO: insert LCS code here
+  /// COMPLETED: insert LCS code here
   // Time start
-  std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
+  std::chrono::time_point<std::chrono::system_clock> time_start = std::chrono::system_clock::now();
 
-  /// TODO: Run parallel LCS algorithm
-  /// COMPLETED: Run parallel LCS algorithm
-  C = new int*[m+1]; num_diagonals = m + n - 1;
+  /// TODO: Write and run LCS algorithm in parallel
+  /// COMPLETED: Write and run LCS algorithm in parallel
+  C = new int*[m+1];
   for (int i=0; i<=m; ++i) {
     C[i] = new int[n+1];
     C[i][0] = 0;
@@ -140,106 +140,46 @@ int main (int argc, char* argv[]) {
   for (int j=0; j<=n; ++j) {
     C[0][j] = 0;
   }
-
-  // Running algorithm
-  omploop.setM(m); omploop.setN(n);
-  omploop.setNbThread(nbthreads); omploop.setGranularity(m + n - 1);
-  omploop.parfor<double>(0, nbthreads, 1,
-    before
-    ,
-    f
-    ,
-    after
-  );
+  omploop.setNbThread(nbthreads); // -- omploop.setGranularity(m + n - 1);
+  /**/
+  for (int nd = 1; nd <= (m + n - 1); ++nd) {
+    if (nd <= std::max(m, n)) {
+      beg = 0;
+      end = nd;
+    } else {
+      beg = nd - (std::max(m, n));
+      end = std::max(m, n);
+    }
+    // DEBUG
+    // std::cout << "\n\n\n~~~~~~~~~~\n~~~~~~~~~~\n~~~~~~~~~~ >>" << std::endl;
+    // std::cout << "-> beg, end: " << beg << ", " << end - 1 << std::endl;
+    omploop.parfor(beg, end, 1,
+      f
+    );
+  }
+  /**/
 
   // DEBUG
   // std::cout << "X: " << X << std::endl;
   // std::cout << "Y: " << Y << std::endl;
   // std::cout << "length of X & Y: " << m << ", " << n << std::endl;
-  // std::cout << "num threads: " << m + n - 1 << std::endl;
-  // DEBUG
-  // std::cout << "========== X[" << 1 << "] & Y[" << 4 << "] ----> " << X[1] << " & " << Y[4] << std::endl;
+  // std::cout << "num diagonals: " << m + n - 1 << std::endl;
 
-  /// TODO: Write parallel LCS algorithm
-  /// COMPLETED: Write parallel LCS algorithm
-  // for (int nd = 1; nd <= num_diagonals; ++nd) {
-  //   int xmax, ymax;
-  //   // DEBUG
-  //   // std::cout << "~~~~~~~~~~ >> thread #" << nd << std::endl;
-    
-  //   if (nd <= std::max(m, n)) {
-  //     int beg = 1;
-  //     int end = nd;
-  //     int a = 1;
-  //     int b = nd;
-      
-  //     for (int i = beg; i <= end; ++i) {
-  //       // DEBUG
-  //       xmax = a - 1; if ((a-1) >= m) {xmax = m - 1;}
-  //       ymax = b - 1; if ((b-1) >= n) {ymax = n - 1;}
-  //       // std::cout << "====> a, b: " << a << ", " << b << std::endl;
-  //       // std::cout << "-> xmax: " << xmax << std::endl;
-  //       // std::cout << "-> ymax: " << ymax << std::endl;
-  //       // std::cout << "--> X[" << xmax << "], Y[" << ymax << "]: " << X[xmax] << ", " << Y[ymax] << std::endl;
-  //       // std::cout << xmax << ", " << typeid(X).name() << std::endl;
-  //       // int xmax = sizeof(X) / sizeof(X[0]); int ymax = sizeof(Y) / sizeof(Y[0]);
-  //       // if ((a-1) >= (sizeof(X) / sizeof(X[0])) {}
-  //       if (X[xmax] == Y[ymax]) {
-  //         // DEBUG
-  //         // std::cout << "!!! MATCH !!!"<<std::endl;
-  //         C[xmax+1][ymax+1] = C[xmax][ymax] + 1;
-  //       } else {
-  //         C[xmax+1][ymax+1] = std::max(C[xmax][ymax+1], C[xmax+1][ymax]);
-  //       }
-  //       // DEBUG
-  //       // std::cout << "---> C[" << xmax << "][" << ymax << "] = " << C[xmax][ymax] << std::endl;
-  //       if (i == end) {
-  //         break;
-  //       } else{
-  //         ++a; --b;
-  //       }
-  //     }
-  //   } else {
-  //     int beg = nd - (std::max(m, n)) + 1;
-  //     int end = std::max(m, n);
-  //     int a = nd - (std::max(m, n)) + 1;
-  //     int b = std::max(m, n);
-      
-  //     for (int i = beg; i <= end; ++i) {
-  //       xmax = a - 1; if ((a-1) >= m) {xmax = m - 1;}
-  //       ymax = b - 1; if ((b-1) >= n) {ymax = n - 1;}
-  //       // DEBUG
-  //       // std::cout << "====> a, b: " << a << ", " << b << std::endl;
-  //       // std::cout << "-> xmax: " << xmax << std::endl;
-  //       // std::cout << "-> ymax: " << ymax << std::endl;
-  //       // std::cout << "--> X[" << xmax << "], Y[" << ymax << "]: " << X[xmax] << ", " << Y[ymax] << std::endl;
-  //       if (X[xmax] == Y[ymax]) {
-  //         // DEBUG
-  //         // std::cout << "!!! MATCH !!!"<<std::endl;
-  //         C[xmax+1][ymax+1] = C[xmax][ymax] + 1; 
-  //       } else {
-  //         C[xmax+1][ymax+1] = std::max(C[xmax][ymax+1], C[xmax+1][ymax]);
-  //       }
-  //       // DEBUG
-  //       // std::cout << "---> C[" << xmax << "][" << ymax << "] = " << C[xmax][ymax] << std::endl;
-  //       if (i == end) {
-  //         break;
-  //       } else{
-  //         ++a; --b;
-  //       }
-  //     }
-  //   }
-  // }
+  /// TODO: Write and run sequential LCS algorithm
+  /// COMPLETED: Write and run sequential LCS algorithm
+  // sequenial_lcs(m, n, C, X, Y);
+
 
   result = C[m][n]; // length of common subsequence
   // DEBUG
   // std::cout << "[][][] >>> result: " << result << std::endl;
+  // std::cout << "[][][] >>> C[" << m << "][" << n << "]: " << C[m][n] << std::endl;
 
   // Time end
-  std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
+  std::chrono::time_point<std::chrono::system_clock> time_end = std::chrono::system_clock::now();
 
   // Time elapsed
-  std::chrono::duration<double> elapsed_seconds = end-start;
+  std::chrono::duration<double> elapsed_seconds = time_end-time_start;
 
   // Print LCS output
   checkLCS(X, m, Y, n, result);
