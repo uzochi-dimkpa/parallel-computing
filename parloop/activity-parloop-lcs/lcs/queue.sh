@@ -17,7 +17,7 @@ fi
 #    exit 1
 #fi
 
-sbatch --partition=Centaurus --chdir=`pwd` --time=02:00:00 --ntasks=1 --cpus-per-task=16 --mem=105G --job-name=mod4plcs bench_lcs.sh
+sbatch --partition=Centaurus --chdir=`pwd` --time=12:00:00 --ntasks=1 --cpus-per-task=16 --mem=105G --job-name=mod4plcs bench_lcs.sh
 
 echo "----------------------"
 echo
