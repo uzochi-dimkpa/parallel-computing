@@ -12,7 +12,7 @@ valgrind_test.cpp
 
 *.out
 *gitignore.swp
-*.zip
+*_submission.zip
 *.tgz
 *.tar
 *.Identifier
