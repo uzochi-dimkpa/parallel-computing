@@ -3,8 +3,15 @@
 #include <iostream>
 
 int main(int argc, char*argv[]) {
+  MPI_Init (&argc, &argv); int size; int rank;
+
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
   char hName[256];
   int out = gethostname(hName, sizeof(hName));
 
-  std::cout << "Hostname: " << hName << "\n";
+  std::cout << "I am process " << rank+1 << " out of " << size << ". I am running on " << hName << "\n";
+
+  MPI_Finalize();
 }
