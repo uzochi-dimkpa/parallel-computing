@@ -28,7 +28,7 @@ int main (int argc, char* argv[]) {
   MPI_Init (&argc, &argv); int size, rank;
   MPI_Comm_size(MPI_COMM_WORLD, &size); MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   // double total [1];
-  float total;
+  double total;
   
   // DEBUG
   // std::cout << "I am process " << rank+1 << " out of " << size << std::endl;
@@ -37,9 +37,9 @@ int main (int argc, char* argv[]) {
   int fid = atoi(argv[1]);
   double a = atof(argv[2]); double b = atof(argv[3]); int64_t n = (int64_t) atoi(argv[4]);
   int intensity = atoi(argv[5]);
-  float coeff = (float) ((b - a) / n);
+  double coeff = (double) ((b - a) / n);
   // double out [1]; out[0] = 0.0;
-  float out;
+  double out;
   typedef float (*fnct[4]) (float, int); double x; int i;
   
   // Function selection
@@ -48,13 +48,25 @@ int main (int argc, char* argv[]) {
   // Integration math & timer
   auto timeStart = std::chrono::system_clock::now();
   
-  for (i = rank * (n / size); i < ((rank + 1) * (n / size)); i++) {
+  int end = (int) ((rank + 1) * (n / size));
+  if ((rank == size - 1) && (n != ((rank + 1) * (n / size)))) end += (n % size);
+  
+  // DEBUG
+  // std::cout << "end: " << end << std::endl;
+  
+  for (i = rank * (n / size); i < end; i++) { // -- ((rank + 1) * (n / size))
     x = (a + (coeff * (i + 0.5)));
     out += function[fid - 1](x, intensity);
     // out += (function[fid - 1](x, intensity)) * coeff;
   }
   out *= coeff;
   total += out;
+  
+  // DEBUG
+  /*
+  std::cout << "test_total: " << test_total << std::endl;
+  std::cout << "total: " << total << std::endl;
+  /**/
   
   auto timeEnd = std::chrono::system_clock::now();
   std::chrono::duration <double> duration = timeEnd - timeStart;
@@ -67,7 +79,7 @@ int main (int argc, char* argv[]) {
   /**/
   
   // MPI_Bcast(&out, size, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Reduce(&(out), &(total), 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+  MPI_Reduce(&(out), &(total), 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   
   // Output
   /**/
