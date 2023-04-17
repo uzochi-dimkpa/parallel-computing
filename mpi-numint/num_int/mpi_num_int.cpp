@@ -28,7 +28,7 @@ int main (int argc, char* argv[]) {
   MPI_Init (&argc, &argv); int size, rank;
   MPI_Comm_size(MPI_COMM_WORLD, &size); MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   // double total [1];
-  double total;
+  float total;
   
   // DEBUG
   // std::cout << "I am process " << rank+1 << " out of " << size << std::endl;
@@ -37,9 +37,9 @@ int main (int argc, char* argv[]) {
   int fid = atoi(argv[1]);
   double a = atof(argv[2]); double b = atof(argv[3]); int64_t n = (int64_t) atoi(argv[4]);
   int intensity = atoi(argv[5]);
-  double coeff = (double) ((b - a) / n);
+  float coeff = (float) ((b - a) / n);
   // double out [1]; out[0] = 0.0;
-  double out;
+  float out;
   typedef float (*fnct[4]) (float, int); double x; int i;
   
   // Function selection
@@ -67,7 +67,7 @@ int main (int argc, char* argv[]) {
   /**/
   
   // MPI_Bcast(&out, size, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Reduce(&(out), &(total), 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+  MPI_Reduce(&(out), &(total), 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
   
   // Output
   /**/
